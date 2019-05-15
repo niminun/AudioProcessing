@@ -8,6 +8,7 @@ import argparse
 
 SPECT_DIR = "spect"
 
+
 if __name__ == '__main__':
 
     ######################## getting arguments ########################
@@ -17,7 +18,7 @@ if __name__ == '__main__':
                              'will be preprocessed for NN usage.')
     parser.add_argument('--out_dir', required=True,
                         help='a path to outputs dir.')
-    parser.add_argument('--suffix', nargs='?', default=['mp3'],
+    parser.add_argument('--suffix', nargs='*', default=['mp3'],
                         help='all relevant audio files suffices')
 
     args = parser.parse_args()

@@ -1,8 +1,18 @@
 <component name="ProjectDictionaryState">
   <dictionary name="nimro">
     <words>
+      <w>avgpool</w>
+      <w>conv</w>
+      <w>convs</w>
+      <w>deconv</w>
+      <w>downsample</w>
       <w>dtype</w>
+      <w>griffinlim</w>
+      <w>inplanes</w>
+      <w>librosa</w>
+      <w>maxpool</w>
       <w>mels</w>
+      <w>relu</w>
       <w>seaborn</w>
       <w>spect</w>
       <w>spects</w>

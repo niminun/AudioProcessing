@@ -6,7 +6,7 @@ import librosa.display
 ms.use('seaborn-muted')
 
 
-def plot_spectrogram(spect, x_axis, y_axis, sr=SR, title=''):
+def plot_spectrogram(spect, x_axis, y_axis, sr=SR, title='', show=True):
     h, w = spect.shape
     plt.figure(figsize=(int(w/100), int(h/100)))
 
@@ -19,4 +19,5 @@ def plot_spectrogram(spect, x_axis, y_axis, sr=SR, title=''):
     # draw a color bar
     plt.colorbar(format='%+02.0f dB')
 
-    plt.show()
+    if show:
+        plt.show()
