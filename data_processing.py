@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import librosa
 from glob import iglob
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 
 PHASE_EXT = "__phase.bin"
@@ -213,7 +213,7 @@ class SpectrogramDataset(Dataset):
 
         # calculate total number of samples in the data set.
         self._num_samples = 0
-        self._calc_len()
+        self._init_samples()
 
     def __len__(self):
         return self._num_samples
@@ -227,7 +227,7 @@ class SpectrogramDataset(Dataset):
         sample_start = random.randint(int(spect.shape[1]) - self._sample_width)
         return spect[sample_start: sample_start + self._sample_width]
 
-    def _calc_len(self):
+    def _init_samples(self):
         self._num_samples = 0
         pattern = os.path.join(self._in_dir, "*{}".format(self._suffix))
         for f_path in iglob(pattern):
