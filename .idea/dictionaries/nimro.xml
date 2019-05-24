@@ -4,11 +4,13 @@
       <w>avgpool</w>
       <w>conv</w>
       <w>convs</w>
+      <w>cuda</w>
       <w>dataloader</w>
       <w>deconv</w>
       <w>downsample</w>
       <w>dtype</w>
       <w>griffinlim</w>
+      <w>inds</w>
       <w>inplanes</w>
       <w>iters</w>
       <w>librosa</w>

@@ -3,7 +3,6 @@ from __future__ import print_function
 import os
 import random
 import warnings
-
 import numpy as np
 import librosa
 from glob import iglob
@@ -202,11 +201,12 @@ def griffinlim(S, n_iter=32, hop_length=None, win_length=None, window='hann',
 class SpectrogramDataset(Dataset):
     """Spectrogram dataset."""
 
-    def __init__(self, in_dir, suffix, sample_width, spect_h, dtype='float32'):
+    def __init__(self, in_dir, suffix, sample_width, spect_h, label, dtype='float32'):
         self._in_dir = in_dir
         self._suffix = suffix
         self._sample_width = sample_width
         self._spect_h = spect_h
+        self._label = label
         self._dtype = dtype
         self._paths = []
         self._avg_samp_per_spect = 0
@@ -225,7 +225,7 @@ class SpectrogramDataset(Dataset):
         spect_idx = int(idx / self._avg_samp_per_spect)
         spect = np.memmap(self._paths[spect_idx], dtype=self._dtype, mode='r').reshape(self._spect_h, -1)
         sample_start = random.randint(int(spect.shape[1]) - self._sample_width)
-        return spect[sample_start: sample_start + self._sample_width]
+        return spect[sample_start: sample_start + self._sample_width], self._label
 
     def _init_samples(self):
         self._num_samples = 0
