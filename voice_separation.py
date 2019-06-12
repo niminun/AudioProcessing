@@ -3,35 +3,32 @@
 #
 import os
 from data_processing import audio_dir_to_spects
-import argparse
 
-
+CONVERT_AUDIO = False
+AUDIO_DIR = ""
 SPECT_DIR = "spect"
+OUT_DIR = r"C:\\Users\nimro\Projects\VoiceSeparation\V1\spects"
+SUFFIX = ["mp3"]
 
+BASE_DIR = r"C:\\Users\nimro\Projects\VoiceSeparation\V1\model_training"
+ALL_INSTRUMENTS_DATA = ""
+DRUMS_DATA = ""
+NO_DRUMS_DATA = ""
 
 if __name__ == '__main__':
 
-    ######################## getting arguments ########################
-    parser = argparse.ArgumentParser(description='Voice separation script.')
-    parser.add_argument('--audio_dir', default=None,
-                        help='a path to audio files directory. If provided, it '
-                             'will be preprocessed for NN usage.')
-    parser.add_argument('--out_dir', required=True,
-                        help='a path to outputs dir.')
-    parser.add_argument('--suffix', nargs='*', default=['mp3'],
-                        help='all relevant audio files suffices')
-
-    args = parser.parse_args()
-
-    ######################## running operations ########################
-    spect_dir = os.path.join(args.out_dir, SPECT_DIR)
+    spect_dir = os.path.join(OUT_DIR, SPECT_DIR)
     if not os.path.isdir(spect_dir):
         os.makedirs(spect_dir)
 
-    # converting audio files to spectrogram
-    if args.audio_dir:
-        audio_dir_to_spects(args.audio_dir, spect_dir, args.suffix)
+    ######################## running operations ########################
 
-    # training a model TODO
+    # converting audio files to spectrogram
+    if CONVERT_AUDIO:
+        audio_dir_to_spects(AUDIO_DIR, spect_dir, SUFFIX)
+
+    # training separator
+    command = "model_trainer.py --base_dir={} --x_data_dir={}, --y_data_dir={} --z_data_dir{}" \
+              .format(BASE_DIR, DRUMS_DATA, NO_DRUMS_DATA, ALL_INSTRUMENTS_DATA)
 
     # generating separated voices TODO

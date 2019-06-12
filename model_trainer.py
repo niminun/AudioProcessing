@@ -1,12 +1,13 @@
+import argparse
 import os
 import time
-
-from torch import nn
-from torch.utils.data import DataLoader
-from data_processing import SpectrogramDataset
 import torch
 import numpy as np
+from torch import nn
+from torch.utils.data import DataLoader
 
+from data_processing import SpectrogramDataset
+from models import ResNetDiscriminator, ResNetGenerator, NonPaddedBasicBlock, LeakyBasicBlock
 
 MAG_DB_BIN = "__mag_db.bin"
 DISCRIMINATOR_Y = "discriminator_y"
@@ -92,6 +93,8 @@ class VoiceSeparationTrainer(object):
 
         eval_interval = eval_interval if eval_interval else int(max_iters / 100)  # do 100 evaluations by default.
         log_file = os.path.join(self._base_dir, "generator_train.log")
+        to_log(log_file, "Start Training")
+        to_log(log_file, "device: {}".format(device))
 
         # creating data generators
         train_x_data_set = SpectrogramDataset(in_dir=train_x_data_dir, suffix=MAG_DB_BIN,
@@ -154,7 +157,7 @@ class VoiceSeparationTrainer(object):
 
             # evaluating and saving models
             if t % eval_interval == 0:
-                to_log(log_file, '-' * 89)
+                to_log(log_file, '-' * 36 + ' Validation - {:d} '.format(t / eval_interval) + '-' * 36)
                 # evaluate and save generator.
                 gen_loss, gen_x_success_rate, gen_y_success_rate = \
                     self._validate_generator(self._gen, self._disc_x, self._disc_y, gen_steps_per_iter * 100)
@@ -198,7 +201,8 @@ class VoiceSeparationTrainer(object):
             self._update_history(x_generated, self._train_gen_x_history)
             self._update_history(y_generated, self._train_gen_y_history)
             step_time = time.time() - start_time
-            # todo - log losses, times, etc'
+            to_log(log_file, '| {:s} |  step {:3d}  |  ms/batch {:5.2f}  |  x_loss {:5.3f}  |  y_loss {:5.3f}  |'
+                             .format(time.strftime("%X"), k, step_time * 1000, x_loss, y_loss))
 
     def _train_discriminator(self, discriminator, optimizer, batch_load_fn, num_steps, batch_size, name):
         """"""
@@ -216,7 +220,8 @@ class VoiceSeparationTrainer(object):
             loss.backward()
             optimizer.step()
             step_time = time.time() - start_time
-            # todo - log losses, times, etc'
+            to_log(log_file, '| {:s} |  step {:3d}  |  ms/batch {:5.2f}  |  {:s}_loss {:5.3f}  |'
+                   .format(time.strftime("%X"), k, step_time * 1000, name, loss))
 
     def _validate_generator(self, generator, x_discriminator, y_discriminator, num_steps):
         """"""
@@ -404,3 +409,27 @@ class InfiniteDataLoader(object):
             self._dataloader_iterator = iter(self._dataloader)
             data = next(self._dataloader_iterator)
         yield data
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Voice separation model trainer.')
+    parser.add_argument('--base_dir', required=True, help='a path to model training output dir.')
+    parser.add_argument('--x_data_dir', required=True, help='a path to x data dir.')
+    parser.add_argument('--y_data_dir', required=True, help='a path to y data dir.')
+    parser.add_argument('--z_data_dir', required=True, help='a path to z data dir.')
+    args = parser.parse_args()
+
+    _train_x_data = os.path.join(args.x_data_dir, "train")
+    _train_y_data = os.path.join(args.y_data_dir, "train")
+    _train_z_data = os.path.join(args.z_data_dir, "train")
+    _val_x_data = os.path.join(args.x_data_dir, "validation")
+    _val_y_data = os.path.join(args.y_data_dir, "validation")
+    _val_z_data = os.path.join(args.z_data_dir, "validation")
+
+    _generator = ResNetGenerator(NonPaddedBasicBlock, [2, 1, 1, 1])  # TODO - try sizes
+    _discriminator_x = ResNetDiscriminator(LeakyBasicBlock, [2, 2, 2, 2])  # TODO - try sizes
+    _discriminator_y = ResNetDiscriminator(LeakyBasicBlock, [2, 2, 2, 2])  # TODO - try sizes
+    _trainer = VoiceSeparationTrainer(args.base_dir, _generator, _discriminator_x, _discriminator_y)
+    _trainer.train(train_x_data_dir=_train_x_data, train_y_data_dir=_train_y_data, train_z_data_dir=_train_z_data,
+                   val_x_data_dir=_val_x_data, val_y_data_dir=_val_y_data, val_z_data_dir=_val_z_data)
+
