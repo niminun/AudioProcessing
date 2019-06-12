@@ -8,7 +8,7 @@ ms.use('seaborn-muted')
 
 def plot_spectrogram(spect, x_axis, y_axis, sr=SR, title='', show=True):
     h, w = spect.shape
-    plt.figure(figsize=(int(w/100), int(h/100)))
+    plt.figure(figsize=(int(w/100 + 0.99), int(h/100 + 0.99)))
 
     # plot
     librosa.display.specshow(spect, sr=sr, x_axis=x_axis, y_axis=y_axis)
